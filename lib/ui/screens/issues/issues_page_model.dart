@@ -24,7 +24,8 @@ class IssuesPageModel with ChangeNotifier {
   Future<void> fetchIssues() async {
     try {
       updateWith(isLoading: true);
-      List<Issue> fetchedIssues = await api.getIssues(pageNumber, perPage);
+      List<Issue> fetchedIssues =
+          await api.getIssues(pageNumber: pageNumber, perPage: perPage);
       if (fetchedIssues.isEmpty) return;
       updateWith(issues: fetchedIssues);
       updateWith(pageNumber: ++pageNumber);

@@ -7,9 +7,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 
 class APIService {
-  Future<List<Issue>> getIssues(int pageNumber, int perPage) async =>
+  /// Gets All open issues if no parameters given
+  /// Can implement pagination when [pageNumber] and [perPage] are give
+  Future<List<Issue>> getIssues({int pageNumber, int perPage}) async =>
       await getData(
-        apiUrl: '${APIUrl.issues(pageNumber, perPage)}',
+        apiUrl: '${APIUrl.issues(pageNumber: pageNumber, perPage: perPage)}',
         headers: {"Authorization": env["GIT_TOKEN"]},
         errMsg: "Failed to load issues",
         builder: (data) => Issue.fromMap(data),
@@ -25,7 +27,7 @@ class APIService {
   Future<List<T>> getData<T>({
     @required String apiUrl,
     Map<String, String> headers,
-    String errMsg: "Faild to load data",
+    String errMsg: "Failed to load data",
     @required T builder(Map<String, dynamic> data),
   }) async {
     final response = await http.get(apiUrl, headers: headers);

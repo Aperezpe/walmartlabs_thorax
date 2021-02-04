@@ -97,14 +97,8 @@ class IssuePage extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  color: Colors.white,
-                ),
-                Text(
-                  "Open",
-                  style: TextStyle(color: Colors.white),
-                )
+                Icon(model.stateIcon, color: Colors.white),
+                Text(model.issue.state, style: TextStyle(color: Colors.white))
               ],
             ),
           ),

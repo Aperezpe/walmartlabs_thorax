@@ -25,6 +25,8 @@ class IssuePageModel with ChangeNotifier {
   bool isLoading;
   List<Comment> comments;
   BuildContext context;
+  IconData get stateIcon =>
+      issue.state == "open" ? Icons.error_outline : Icons.cancel_sharp;
 
   String getFormattedDate(DateTime date) {
     final DateFormat formatter = DateFormat("MMM d, y");
