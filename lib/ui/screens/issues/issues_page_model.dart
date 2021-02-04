@@ -13,7 +13,6 @@ class IssuesPageModel with ChangeNotifier {
   }) {
     this.issues = List<Issue>();
     this.api = APIService();
-    fetchIssues();
   }
 
   APIService api;
@@ -22,16 +21,19 @@ class IssuesPageModel with ChangeNotifier {
   int perPage;
   bool isLoading;
 
-  void fetchIssues() async {
-    updateWith(isLoading: true);
-    List<Issue> fetchedIssues = await api.getIssues(pageNumber, perPage);
-    if (fetchedIssues.isEmpty) {
+  Future<void> fetchIssues() async {
+    try {
+      updateWith(isLoading: true);
+      List<Issue> fetchedIssues = await api.getIssues(pageNumber, perPage);
+      if (fetchedIssues.isEmpty) return;
+      updateWith(issues: fetchedIssues);
+      updateWith(pageNumber: ++pageNumber);
+    } catch (e) {
+      updateWith(issues: []);
+      rethrow;
+    } finally {
       updateWith(isLoading: false);
-      return;
     }
-    updateWith(issues: fetchedIssues);
-    updateWith(pageNumber: ++pageNumber);
-    updateWith(isLoading: false);
   }
 
   void updateWith({

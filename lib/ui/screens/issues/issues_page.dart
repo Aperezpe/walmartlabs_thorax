@@ -28,6 +28,28 @@ class _IssuesPageState extends State<IssuesPage> {
   Icon openStateIcon = Icon(Icons.error_outline, color: Colors.green);
   Icon closedStateIcon = Icon(Icons.cancel_sharp, color: Colors.red);
 
+  void fetchIssues() async {
+    try {
+      await model.fetchIssues();
+    } catch (e) {
+      return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Error"),
+            content: Text(e.toString()),
+            actions: <Widget>[
+              TextButton(
+                child: Text("Ok"),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            ],
+          );
+        },
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -35,9 +57,11 @@ class _IssuesPageState extends State<IssuesPage> {
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        model.fetchIssues();
+        fetchIssues();
       }
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => fetchIssues());
   }
 
   @override

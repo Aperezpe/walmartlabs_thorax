@@ -11,7 +11,7 @@ class IssuePage extends StatelessWidget {
 
   static Widget create(BuildContext context, Issue issue) {
     return ChangeNotifierProvider<IssuePageModel>(
-      create: (_) => IssuePageModel(issue: issue),
+      create: (_) => IssuePageModel(context: context, issue: issue),
       child: Consumer<IssuePageModel>(
         builder: (_, model, __) => IssuePage(model: model),
       ),
