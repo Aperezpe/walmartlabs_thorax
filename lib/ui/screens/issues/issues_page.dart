@@ -1,39 +1,43 @@
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import 'package:flutter/material.dart';
-import 'package:thorax_issues/ui/models/issue.dart';
+import 'package:provider/provider.dart';
+import 'package:thorax_issues/ui/screens/issue/issue_page.dart';
+import 'package:thorax_issues/ui/screens/issues/issues_page_model.dart';
 
 class IssuesPage extends StatefulWidget {
+  IssuesPage({@required this.model});
+
+  final IssuesPageModel model;
+
+  static Widget create(BuildContext context) {
+    return ChangeNotifierProvider<IssuesPageModel>(
+      create: (_) => IssuesPageModel(),
+      child: Consumer<IssuesPageModel>(
+        builder: (_, model, __) => IssuesPage(model: model),
+      ),
+    );
+  }
+
   @override
   _IssuesPageState createState() => _IssuesPageState();
 }
 
 class _IssuesPageState extends State<IssuesPage> {
-  List<Issue> issues = List();
-  int pageNumber = 1;
-  int perPage = 10;
-  bool isLoading = false;
   ScrollController _scrollController = ScrollController();
+  IssuesPageModel get model => widget.model;
+
+  Icon openStateIcon = Icon(Icons.error_outline, color: Colors.green);
+  Icon closedStateIcon = Icon(Icons.cancel_sharp, color: Colors.red);
 
   @override
   void initState() {
     super.initState();
-    fetchTen();
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        fetchTen();
+        model.fetchIssues();
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
   }
 
   @override
@@ -47,66 +51,48 @@ class _IssuesPageState extends State<IssuesPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Heading
             Text("Walmart / Thorax", style: TextStyle(fontSize: 22)),
             Text(
               "Issues",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-
             Expanded(
               child: ListView.separated(
                 controller: _scrollController,
-                itemCount: issues.length,
+                itemCount: model.issues.length,
                 separatorBuilder: (context, index) => Divider(height: 0.5),
                 itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    title: Text(issues[index].title),
-                    subtitle: Text('#${issues[index].number}'),
-                    leading: issues[index].state == "open"
-                        ? Icon(Icons.error_outline, color: Colors.green)
-                        : Icon(Icons.cancel_sharp, color: Colors.red),
-                    trailing: Icon(Icons.chevron_right),
-                    onTap: () {},
-                  );
+                  return buildListTile(index, context);
                 },
               ),
             ),
-
-            isLoading
+            model.isLoading
                 ? Center(child: CircularProgressIndicator())
                 : Container(),
-
-            // TODO: Fetch Github Issues and show as List Tile
-            // build
           ],
         ),
       ),
     );
   }
 
-  void fetchTen() async {
-    try {
-      setState(() => isLoading = true);
-      final response = await http.get(
-          "https://api.github.com/repos/walmartlabs/thorax/issues?page=$pageNumber&per_page=$perPage",
-          headers: {"Authorization": env["GIT_TOKEN"]});
-
-      if (response.statusCode == 200) {
-        List<dynamic> jsonData = jsonDecode(response.body);
-        setState(() {
-          for (var data in jsonData) {
-            issues.add(Issue.fromMap(data));
-          }
-        });
-        pageNumber++;
-      } else {
-        throw Exception('Failed to load issues');
-      }
-    } catch (err) {
-      print(err);
-    } finally {
-      setState(() => isLoading = false);
-    }
+  ListTile buildListTile(int index, BuildContext context) {
+    return ListTile(
+      title: Text(
+        model.issues[index].title,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      subtitle: Text('#${model.issues[index].number}'),
+      leading:
+          model.issues[index].state == "open" ? openStateIcon : closedStateIcon,
+      trailing: Icon(Icons.chevron_right),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => IssuePage.create(context, model.issues[index]),
+        ),
+      ),
+    );
   }
 }
