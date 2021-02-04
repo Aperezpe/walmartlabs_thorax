@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart' as DotEnv;
 
 import 'package:thorax_issues/ui/screens/issues/issues_page.dart';
 
 void main() async {
-  await DotEnv.load(fileName: ".env");
   runApp(MyApp());
 }
 
